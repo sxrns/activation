@@ -1,152 +1,190 @@
-document.getElementById("calculateButton").addEventListener("click", function() {
-    // Collect user inputs from the form
-    const temperatures = [
-        parseFloat(document.getElementById("temp1").value),
-        parseFloat(document.getElementById("temp2").value),
-        parseFloat(document.getElementById("temp3").value)
-    ];
+document.getElementById("calculateButton").addEventListener("click", () => {
+    // Get input values
+    const temp1 = parseFloat(document.getElementById("temp1").value);
+    const temp2 = parseFloat(document.getElementById("temp2").value);
+    const temp3 = parseFloat(document.getElementById("temp3").value);
 
     const na = parseFloat(document.getElementById("na").value);
     const nb = parseFloat(document.getElementById("nb").value);
     const nhcl = parseFloat(document.getElementById("nhcl").value);
-    const vrmix = parseFloat(document.getElementById("vrmix").value) / 1000;  // Convert to L
-    const va = parseFloat(document.getElementById("va").value) / 1000;  // Convert to L
-    const vb = parseFloat(document.getElementById("vb").value) / 1000;  // Convert to L
-    const time = Array.from(document.getElementById("timeValues").value.split(',').map(x => parseFloat(x.trim())));
 
-    // Extract titration volumes for each temperature (in mL, convert to L)
-    const vnaohData = [
-        document.getElementById("vnaoh1").value.split(',').map(x => parseFloat(x.trim()) / 1000), // Temp 1
-        document.getElementById("vnaoh2").value.split(',').map(x => parseFloat(x.trim()) / 1000), // Temp 2
-        document.getElementById("vnaoh3").value.split(',').map(x => parseFloat(x.trim()) / 1000)  // Temp 3
-    ];
+    const vrmix = parseFloat(document.getElementById("vrmix").value) / 1000; // Convert to L
+    const va = parseFloat(document.getElementById("va").value) / 1000; // Convert to L
+    const vb = parseFloat(document.getElementById("vb").value) / 1000; // Convert to L
 
-    // Initial concentrations
+    const time = document.getElementById("timeValues").value.split(",").map(Number);
+
+    const vnaoh1 = document.getElementById("vnaoh1").value.split(",").map(Number);
+    const vnaoh2 = document.getElementById("vnaoh2").value.split(",").map(Number);
+    const vnaoh3 = document.getElementById("vnaoh3").value.split(",").map(Number);
+
+    const temperatures = [temp1, temp2, temp3];
+    const vnaohData = [vnaoh1, vnaoh2, vnaoh3];
+    const kValues = [];
+
+    const resultsContainer = document.getElementById("reactionRateResults");
+    resultsContainer.innerHTML = ""; // Clear previous results
+    const plotsContainer = document.getElementById("plots");
+    plotsContainer.innerHTML = ""; // Clear previous plots
+
+    // Constants
     const ca0 = (na * va) / (va + vb);
     const cb0 = (nb * vb) / (va + vb);
-    const vts = vrmix + 10 / 1000; // Volume of HCl + volume of reaction mixture (L)
+    const vts = vrmix + vrmix;
 
-    // To store rate constants for each temperature
-    const kValues = [];
-    const plots = document.getElementById("plots");
-    plots.innerHTML = '';  // Clear previous plots
-
-    // Loop through each temperature
-    for (let i = 0; i < temperatures.length; i++) {
-        const temp = temperatures[i];
-        const vnaohValues = vnaohData[i];
+    vnaohData.forEach((vnaohValues, index) => {
         const invCaValues = [];
-        const timeValues = [];
+        const regressorTime = [];
+        const regressorInvCa = [];
+        const temp = temperatures[index];
 
-        // Calculate 1/CA values
-        for (let j = 0; j < time.length; j++) {
-            const vnaoh = vnaohValues[j];
-            // Calculate moles of HCl reacted with NaOH
-            const nmhcl = (nhcl * vrmix) - (vnaoh * nb);
-            const cb = nmhcl / vts;  // Concentration of unreacted NaOH
-            const ca = ca0 - (cb0 - cb);  // Concentration of unreacted ethyl acetate
-            const invCa = 1 / ca;  // Inverse of concentration
-            invCaValues.push(invCa);
-            timeValues.push(time[j]);
-        }
+        // Calculate 1/CA
+        vnaohValues.forEach((vnaoh, i) => {
+            const nmhcl = (vrmix * nhcl) - (vnaoh / 1000 * nb); // Convert vnaoh to L
+            const cb = nmhcl / vts;
+            const ca = ca0 - (cb0 - cb);
 
-        // Linear regression (slope = reaction rate constant k)
-        const { slope } = linearRegression(timeValues, invCaValues);
-        kValues.push(slope);
-
-        // Plot 1/CA vs. time for each temperature
-        const canvas = document.createElement("canvas");
-        plots.appendChild(canvas);
-        new Chart(canvas.getContext("2d"), {
-            type: "line",
-            data: {
-                labels: timeValues,
-                datasets: [{
-                    label: `1/CA vs. Time at ${temp} K`,
-                    data: invCaValues,
-                    borderColor: "blue",
-                    fill: false,
-                    pointRadius: 5
-                }]
-            },
-            options: {
-                responsive: true,
-                title: {
-                    display: true,
-                    text: `1/CA vs. Time at ${temp} K`
-                },
-                scales: {
-                    x: { title: { display: true, text: "Time (minutes)" } },
-                    y: { title: { display: true, text: "1/CA (L/mol)" } }
-                }
+            if (ca > 0) {
+                invCaValues.push(1 / ca);
+                regressorTime.push(time[i]);
+                regressorInvCa.push(1 / ca);
             }
         });
 
-        // Display reaction rate constant (k) for this temperature
-        const resultDiv = document.getElementById("reactionRateResults");
-        const kText = `Reaction rate constant (k) at ${temp} K: ${slope.toFixed(4)} L/(mol·min)`;
-        resultDiv.innerHTML += `<p>${kText}</p>`;
-    }
+        // Perform linear regression
+        const n = regressorTime.length;
+        const sumX = regressorTime.reduce((acc, val) => acc + val, 0);
+        const sumY = regressorInvCa.reduce((acc, val) => acc + val, 0);
+        const sumXY = regressorTime.reduce((acc, val, i) => acc + val * regressorInvCa[i], 0);
+        const sumX2 = regressorTime.reduce((acc, val) => acc + val ** 2, 0);
 
-    // Perform Arrhenius analysis (ln(k) vs 1/T)
-    const lnK = kValues.map(k => Math.log(k));
-    const reciprocalTemps = temperatures.map(temp => 1 / temp);
+        const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX ** 2);
+        const intercept = (sumY - slope * sumX) / n;
 
-    // Linear regression for Arrhenius plot
-    const { slope, intercept } = linearRegression(reciprocalTemps, lnK);
+        kValues.push(slope);
 
-    // Calculate activation energy and frequency factor
-    const R = 8.314;  // Gas constant in J/(mol·K)
-    const activationEnergy = -slope * R;  // E = -slope * R
-    const frequencyFactor = Math.exp(intercept);  // A = exp(intercept)
+        // Display plot for 1/CA vs. Time
+        const canvas = document.createElement("canvas");
+        canvas.id = `plot${index}`;
+        plotsContainer.appendChild(canvas);
 
-    // Plot the Arrhenius plot
+        new Chart(canvas, {
+            type: "scatter",
+            data: {
+                datasets: [
+                    {
+                        label: "1/CA Data Points",
+                        data: regressorTime.map((x, i) => ({ x, y: regressorInvCa[i] })),
+                        backgroundColor: "blue",
+                    },
+                    {
+                        label: `Regression Line (k = ${slope.toFixed(4)})`,
+                        data: regressorTime.map((x) => ({ x, y: slope * x + intercept })),
+                        type: "line",
+                        borderColor: "red",
+                        fill: false,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: `1/CA vs. Time at ${temp} K`,
+                    },
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: "Time (minutes)",
+                        },
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: "1/CA (L/mol)",
+                        },
+                    },
+                },
+            },
+        });
+
+        // Append slope to results
+        const result = document.createElement("p");
+        result.textContent = `Reaction rate constant (k) at ${temp} K: ${slope.toFixed(4)} L/(mol·min)`;
+        resultsContainer.appendChild(result);
+    });
+
+    // Arrhenius plot
+    const lnK = kValues.map((k) => Math.log(k));
+    const reciprocalT = temperatures.map((t) => 1 / t);
+
+    const n = reciprocalT.length;
+    const sumX = reciprocalT.reduce((acc, val) => acc + val, 0);
+    const sumY = lnK.reduce((acc, val) => acc + val, 0);
+    const sumXY = reciprocalT.reduce((acc, val, i) => acc + val * lnK[i], 0);
+    const sumX2 = reciprocalT.reduce((acc, val) => acc + val ** 2, 0);
+
+    const arrheniusSlope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX ** 2);
+    const arrheniusIntercept = (sumY - arrheniusSlope * sumX) / n;
+
+    const activationEnergy = -arrheniusSlope * 8.314; // J/mol
+    const frequencyFactor = Math.exp(arrheniusIntercept);
+
     const arrheniusCanvas = document.createElement("canvas");
-    plots.appendChild(arrheniusCanvas);
-    new Chart(arrheniusCanvas.getContext("2d"), {
-        type: "line",
+    arrheniusCanvas.id = "arrheniusPlot";
+    plotsContainer.appendChild(arrheniusCanvas);
+
+    new Chart(arrheniusCanvas, {
+        type: "scatter",
         data: {
-            labels: reciprocalTemps,
-            datasets: [{
-                label: 'Arrhenius Plot (ln(k) vs 1/T)',
-                data: lnK,
-                borderColor: "green",
-                fill: false,
-                pointRadius: 5
-            }]
+            datasets: [
+                {
+                    label: "ln(k) Data Points",
+                    data: reciprocalT.map((x, i) => ({ x, y: lnK[i] })),
+                    backgroundColor: "blue",
+                },
+                {
+                    label: `Regression Line`,
+                    data: reciprocalT.map((x) => ({ x, y: arrheniusSlope * x + arrheniusIntercept })),
+                    type: "line",
+                    borderColor: "red",
+                    fill: false,
+                },
+            ],
         },
         options: {
             responsive: true,
-            title: {
-                display: true,
-                text: "Arrhenius Plot: ln(k) vs 1/T"
+            plugins: {
+                title: {
+                    display: true,
+                    text: "ln(k) vs. 1/T (Arrhenius Plot)",
+                },
             },
             scales: {
-                x: { title: { display: true, text: "1/T (1/K)" } },
-                y: { title: { display: true, text: "ln(k)" } }
-            }
-        }
+                x: {
+                    title: {
+                        display: true,
+                        text: "1/T (1/K)",
+                    },
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: "ln(k)",
+                    },
+                },
+            },
+        },
     });
 
     // Display Arrhenius results
-    const arrheniusResults = `
-        <h3>Arrhenius Analysis Results</h3>
+    const arrheniusResults = document.getElementById("arrheniusResults");
+    arrheniusResults.innerHTML = `
+        <h2>Arrhenius Analysis Results</h2>
         <p>Activation Energy (E): ${activationEnergy.toFixed(2)} J/mol</p>
         <p>Frequency Factor (A): ${frequencyFactor.toExponential(2)}</p>
     `;
-    document.getElementById("arrheniusResults").innerHTML = arrheniusResults;
 });
-
-// Linear regression function (y = mx + b)
-function linearRegression(xValues, yValues) {
-    const n = xValues.length;
-    const sumX = xValues.reduce((acc, x) => acc + x, 0);
-    const sumY = yValues.reduce((acc, y) => acc + y, 0);
-    const sumXY = xValues.reduce((acc, x, i) => acc + x * yValues[i], 0);
-    const sumX2 = xValues.reduce((acc, x) => acc + x * x, 0);
-
-    const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
-    const intercept = (sumY - slope * sumX) / n;
-
-    return { slope, intercept };
-}
