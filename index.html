@@ -3,57 +3,149 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chemical Kinetics Analysis</title>
-    <!-- Include Chart.js -->
+    <title>Chemical Kinetics Calculator</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Link to your script file -->
     <script src="script.js" defer></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-top: 20px;
+        }
+
+        form {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+            color: #555;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .form-section {
+            margin-top: 20px;
+        }
+
+        #reactionRateResults, #plots, #arrheniusResults {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 <body>
     <h1>Chemical Kinetics Calculator</h1>
     <form id="inputForm">
         <!-- Input fields for temperatures -->
-        <label for="temp1">Temperature 1 (K):</label>
-        <input type="number" id="temp1" required><br>
+        <div class="form-section">
+            <label for="temp1">Temperature 1 (K):</label>
+            <input type="number" id="temp1" placeholder="e.g., 303" required>
+        </div>
 
-        <label for="temp2">Temperature 2 (K):</label>
-        <input type="number" id="temp2" required><br>
+        <div class="form-section">
+            <label for="temp2">Temperature 2 (K):</label>
+            <input type="number" id="temp2" placeholder="e.g., 313" required>
+        </div>
 
-        <label for="temp3">Temperature 3 (K):</label>
-        <input type="number" id="temp3" required><br>
+        <div class="form-section">
+            <label for="temp3">Temperature 3 (K):</label>
+            <input type="number" id="temp3" placeholder="e.g., 323" required>
+        </div>
 
         <!-- Input fields for constants -->
-        <label for="na">Normality of Ethyl Acetate (NA):</label>
-        <input type="number" id="na" required><br>
+        <div class="form-section">
+            <label for="na">Normality of Ethyl Acetate (NA):</label>
+            <input type="number" id="na" placeholder="e.g., 0.1" required>
+        </div>
 
-        <label for="nb">Normality of NaOH (NB):</label>
-        <input type="number" id="nb" required><br>
+        <div class="form-section">
+            <label for="nb">Normality of NaOH (NB):</label>
+            <input type="number" id="nb" placeholder="e.g., 0.1" required>
+        </div>
 
-        <label for="nhcl">Normality of HCl (NHCl):</label>
-        <input type="number" id="nhcl" required><br>
+        <div class="form-section">
+            <label for="nhcl">Normality of HCl (NHCl):</label>
+            <input type="number" id="nhcl" placeholder="e.g., 0.1" required>
+        </div>
 
-        <label for="vrmix">Volume of Reaction Mixture (mL):</label>
-        <input type="number" id="vrmix" required><br>
+        <div class="form-section">
+            <label for="vrmix">Volume of Reaction Mixture (mL):</label>
+            <input type="number" id="vrmix" placeholder="e.g., 10" required>
+        </div>
 
-        <label for="va">Volume of Ethyl Acetate (mL):</label>
-        <input type="number" id="va" required><br>
+        <div class="form-section">
+            <label for="va">Volume of Ethyl Acetate (mL):</label>
+            <input type="number" id="va" placeholder="e.g., 250" required>
+        </div>
 
-        <label for="vb">Volume of NaOH (mL):</label>
-        <input type="number" id="vb" required><br>
+        <div class="form-section">
+            <label for="vb">Volume of NaOH (mL):</label>
+            <input type="number" id="vb" placeholder="e.g., 250" required>
+        </div>
 
         <!-- Input fields for time -->
-        <label for="timeValues">Time Values (comma-separated):</label>
-        <input type="text" id="timeValues" required><br>
+        <div class="form-section">
+            <label for="timeValues">Time Values (comma-separated):</label>
+            <input type="text" id="timeValues" placeholder="e.g., 0,1,2,3,4,5,6,7,8,9" required>
+        </div>
 
         <!-- Input fields for titration volumes -->
-        <label for="vnaoh1">Titration Volumes at Temp 1 (comma-separated, mL):</label>
-        <input type="text" id="vnaoh1" required><br>
+        <div class="form-section">
+            <label for="vnaoh1">Titration Volumes at Temp 1 (comma-separated, mL):</label>
+            <input type="text" id="vnaoh1" placeholder="e.g., 3.5,4.0,4.7,4.9,5.1,5.5,5.8,5.8,6.0,6.2" required>
+        </div>
 
-        <label for="vnaoh2">Titration Volumes at Temp 2 (comma-separated, mL):</label>
-        <input type="text" id="vnaoh2" required><br>
+        <div class="form-section">
+            <label for="vnaoh2">Titration Volumes at Temp 2 (comma-separated, mL):</label>
+            <input type="text" id="vnaoh2" placeholder="e.g., 5.3,5.6,5.8,5.9,6.0,6.5,6.6,6.8,6.9,7.2" required>
+        </div>
 
-        <label for="vnaoh3">Titration Volumes at Temp 3 (comma-separated, mL):</label>
-        <input type="text" id="vnaoh3" required><br>
+        <div class="form-section">
+            <label for="vnaoh3">Titration Volumes at Temp 3 (comma-separated, mL):</label>
+            <input type="text" id="vnaoh3" placeholder="e.g., 6.0,6.2,6.6,6.8,6.9,7.1,7.2,7.6,7.7,7.9" required>
+        </div>
 
         <button type="button" id="calculateButton">Calculate</button>
     </form>
