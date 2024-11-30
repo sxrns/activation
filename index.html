@@ -20,6 +20,13 @@
             margin-top: 20px;
         }
 
+        img {
+            display: block;
+            margin: 10px auto;
+            max-width: 100%;
+            height: auto;
+        }
+
         form {
             max-width: 600px;
             margin: 20px auto;
@@ -76,7 +83,8 @@
     </style>
 </head>
 <body>
-    <h1>Chemical Kinetics Calculator</h1>
+    <h1>Activation Energy Calculation</h1>
+    <img src="image1.png" alt="Chemical Reaction Diagram">
     <form id="inputForm">
         <!-- Input fields for temperatures -->
         <div class="form-section">
@@ -137,21 +145,4 @@
             <input type="text" id="vnaoh1" placeholder="e.g., 3.5,4.0,4.7,4.9,5.1,5.5,5.8,5.8,6.0,6.2" required>
         </div>
 
-        <div class="form-section">
-            <label for="vnaoh2">Titration Volumes at Temp 2 (comma-separated, mL):</label>
-            <input type="text" id="vnaoh2" placeholder="e.g., 5.3,5.6,5.8,5.9,6.0,6.5,6.6,6.8,6.9,7.2" required>
-        </div>
-
-        <div class="form-section">
-            <label for="vnaoh3">Titration Volumes at Temp 3 (comma-separated, mL):</label>
-            <input type="text" id="vnaoh3" placeholder="e.g., 6.0,6.2,6.6,6.8,6.9,7.1,7.2,7.6,7.7,7.9" required>
-        </div>
-
-        <button type="button" id="calculateButton">Calculate</button>
-    </form>
-
-    <div id="reactionRateResults"></div>
-    <div id="plots"></div>
-    <div id="arrheniusResults"></div>
-</body>
-</html>
+        <div class="form-section
