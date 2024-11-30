@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Reaction Kinetics Analysis</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .form-container {
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            max-width: 800px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input {
+            width: calc(100% - 10px);
+            padding: 5px;
+        }
+        button {
+            display: inline-block;
+            padding: 10px 15px;
+            margin-top: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        canvas {
+            margin: 20px auto;
+            display: block;
+            max-width: 800px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Dynamic Reaction Kinetics Analysis</h1>
+    <div class="form-container">
+        <form id="kineticsForm">
+            <div class="form-group">
+                <label for="temperatures">Temperatures (K, separated by commas):</label>
+                <input type="text" id="temperatures" placeholder="e.g., 303, 313, 323" required>
+            </div>
+            <div class="form-group">
+                <label for="vnaohData">Titration volumes for each temperature (mL, comma-separated for each temperature; semicolon-separated between temperatures):</label>
+                <input type="text" id="vnaohData" placeholder="e.g., 3.5, 4, 4.7; 5.3, 5.6, 5.8; 6, 6.2, 6.6" required>
+            </div>
+            <div class="form-group">
+                <label for="an">Normality of NaOH (N<sub>a</sub>):</label>
+                <input type="number" id="an" value="0.1" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="nb">Normality of NaOH (N<sub>b</sub>):</label>
+                <input type="number" id="nb" value="0.1" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="nhcl">Normality of HCl (N<sub>HCl</sub>):</label>
+                <input type="number" id="nhcl" value="0.1" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="vrmix">Reaction mixture volume (L):</label>
+                <input type="number" id="vrmix" value="0.01" step="0.001" required>
+            </div>
+            <div class="form-group">
+                <label for="va">Volume of ethyl acetate (L):</label>
+                <input type="number" id="va" value="0.25" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="vb">Volume of NaOH (L):</label>
+                <input type="number" id="vb" value="0.25" step="0.01" required>
+            </div>
+            <div class="form-group">
+                <label for="time">Time points (minutes, comma-separated):</label>
+                <input type="text" id="time" placeholder="e.g., 0, 1, 2, 3, 4, 5, 6, 7, 8, 9" required>
+            </div>
+            <button type="button" id="calculateButton">Calculate</button>
+        </form>
+    </div>
+
+    <div id="resultsContainer">
+        <h2>Results</h2>
+        <div id="plots"></div>
+        <div id="tables"></div>
+        <div id="arrheniusResults"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
